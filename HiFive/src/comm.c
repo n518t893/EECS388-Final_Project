@@ -9,6 +9,43 @@ void auto_brake(int devid)
     // Task-1: 
     // Your code here (Use Lab 02 - Lab 04 for reference)
     // Use the directions given in the project document
+    u_int16_t dist = 0;
+    while(1){
+        if ('Y' == ser_read(devid) && 'Y' == ser_read(devid)) {
+            //reading bits 3 and 4
+            uint8_t bit3 = ser_read(devid);
+            uint8_t bit4 = ser_read(devid);
+            //shifting bit 4 by 8 and Or ing with bit 3, since bit 4 goes first
+            dist = (bit4 << 8) | bit3;
+
+            if (dist <= 60) {
+                gpio_write(GREEN_LED, OFF);
+                //turn on flashing red light
+                gpio_write(RED_LED, ON);
+                delay(1000);
+                gpio_write(RED_LED, OFF);
+                delay(1000);
+            }
+            else if (dist <= 100 && dist > 60) {
+                gpio_write(GREEN_LED, OFF);
+                //turn on steady red only
+                gpio_write(RED_LED, ON);
+                delay(1000);
+            }
+            else if (dist <= 200 && dist > 100) {
+                //turn on steady yellow
+                gpio_write(RED_LED, ON);
+                gpio_write(GREEN_LED, ON);
+                delay(1000);
+            }
+            else if (dist > 200) {
+                gpio_write(RED_LED, OFF);
+                //turn on steady green
+                gpio_write(GREEN_LED, ON);
+                delay(1000);
+            }
+        }
+    }
 }
 
 int read_from_pi(int devid)
