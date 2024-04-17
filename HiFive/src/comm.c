@@ -16,7 +16,17 @@ int read_from_pi(int devid)
     // Task-2: 
     // You code goes here (Use Lab 09 for reference)
     // After performing Task-2 at dnn.py code, modify this part to read angle values from Raspberry Pi.
-
+    int angle;
+    if (ser_isready(devid)) {
+        char angle_str[10];
+        int num_read = ser_readline(devid, 10, angle_str);
+        if (num_read > 0) {
+            angle = atoi(angle_str);
+            ser_printline("Received angle: %d\n", angle);
+            return angle;
+        }
+    }
+    return 0; // Return 0 if no angle value received
 }
 
 void steering(int gpio, int pos)

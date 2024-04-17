@@ -90,10 +90,11 @@ while(1):
 		# The if condition is used to send every 4th
 		# prediction from the model. This is so that
 		# the HiFive can run the other functions in between
-		if count%4 == 0:
-			pass
-			#Your code here.
-
+		if count % 4 == 0:
+            # Convert the angle value to bytes and send it over UART
+			angle_bytes = bytes([int(deg)])
+			ser1.write(angle_bytes)
+		
 		
         
         
