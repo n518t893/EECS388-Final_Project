@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "eecs388_lib.h"
 
@@ -10,7 +11,6 @@ void auto_brake(int devid)
     // Your code here (Use Lab 02 - Lab 04 for reference)
     // Use the directions given in the project document
     u_int16_t dist = 0;
-    while(1){
         if ('Y' == ser_read(devid) && 'Y' == ser_read(devid)) {
             //reading bits 3 and 4
             uint8_t bit3 = ser_read(devid);
@@ -44,7 +44,6 @@ void auto_brake(int devid)
                 gpio_write(GREEN_LED, ON);
                 delay(1000);
             }
-        }
     }
 }
 
@@ -57,13 +56,14 @@ int read_from_pi(int devid)
     if (ser_isready(devid)) {
         char angle_str[10];
         int num_read = ser_readline(devid, 10, angle_str);
-        if (num_read > 0) {
-            angle = atoi(angle_str);
-            ser_printline("Received angle: %d\n", angle);
-            return angle;
-        }
+        
+        angle = atoi(angle_str);
+        printf('angle: %d\n', angle);
+        ser_printline(2, angle_str);
+        return angle;
     }
     return 0; // Return 0 if no angle value received
+
 }
 
 void steering(int gpio, int pos)
@@ -71,6 +71,7 @@ void steering(int gpio, int pos)
     // Task-3: 
     // Your code goes here (Use Lab 05 for reference)
     // Check the project document to understand the task
+    
 }
 
 
