@@ -92,7 +92,7 @@ while(1):
 		# the HiFive can run the other functions in between
 		if count % 4 == 0:
             # Convert the angle value to bytes and send it over UART
-			angle_bytes = bytes([int(deg)])
+			angle_bytes = bytes([str(int(deg)+'\n')])
 			ser1.write(angle_bytes)
 		
 		

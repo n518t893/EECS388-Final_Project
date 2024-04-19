@@ -9,43 +9,42 @@ void auto_brake(int devid)
     // Task-1: 
     // Your code here (Use Lab 02 - Lab 04 for reference)
     // Use the directions given in the project document
-    u_int16_t dist = 0;
-    while(1){
-        if ('Y' == ser_read(devid) && 'Y' == ser_read(devid)) {
-            //reading bits 3 and 4
-            uint8_t bit3 = ser_read(devid);
-            uint8_t bit4 = ser_read(devid);
-            //shifting bit 4 by 8 and Or ing with bit 3, since bit 4 goes first
-            dist = (bit4 << 8) | bit3;
+    uint16_t dist = 0;
+    if ('Y' == ser_read(devid) && 'Y' == ser_read(devid)) {
+        //reading bits 3 and 4
+        uint8_t bit3 = ser_read(devid);
+        uint8_t bit4 = ser_read(devid);
+        //shifting bit 4 by 8 and Or ing with bit 3, since bit 4 goes first
+        dist = (bit4 << 8) | bit3;
 
-            if (dist <= 60) {
-                gpio_write(GREEN_LED, OFF);
-                //turn on flashing red light
-                gpio_write(RED_LED, ON);
-                delay(1000);
-                gpio_write(RED_LED, OFF);
-                delay(1000);
-            }
-            else if (dist <= 100 && dist > 60) {
-                gpio_write(GREEN_LED, OFF);
-                //turn on steady red only
-                gpio_write(RED_LED, ON);
-                delay(1000);
-            }
-            else if (dist <= 200 && dist > 100) {
-                //turn on steady yellow
-                gpio_write(RED_LED, ON);
-                gpio_write(GREEN_LED, ON);
-                delay(1000);
-            }
-            else if (dist > 200) {
-                gpio_write(RED_LED, OFF);
-                //turn on steady green
-                gpio_write(GREEN_LED, ON);
-                delay(1000);
-            }
+        if (dist <= 60) {
+            gpio_write(GREEN_LED, OFF);
+            //turn on flashing red light
+            gpio_write(RED_LED, ON);
+            delay(1000);
+            gpio_write(RED_LED, OFF);
+            delay(1000);
+        }
+        else if (dist <= 100 && dist > 60) {
+            gpio_write(GREEN_LED, OFF);
+            //turn on steady red only
+            gpio_write(RED_LED, ON);
+            delay(1000);
+        }
+        else if (dist <= 200 && dist > 100) {
+            //turn on steady yellow
+            gpio_write(RED_LED, ON);
+            gpio_write(GREEN_LED, ON);
+            delay(1000);
+        }
+        else if (dist > 200) {
+            gpio_write(RED_LED, OFF);
+            //turn on steady green
+            gpio_write(GREEN_LED, ON);
+            delay(1000);
         }
     }
+    
 }
 
 int read_from_pi(int devid)
@@ -53,17 +52,16 @@ int read_from_pi(int devid)
     // Task-2: 
     // You code goes here (Use Lab 09 for reference)
     // After performing Task-2 at dnn.py code, modify this part to read angle values from Raspberry Pi.
-    int angle;
-    if (ser_isready(devid)) {
-        char angle_str[10];
-        int num_read = ser_readline(devid, 10, angle_str);
-        if (num_read > 0) {
-            angle = atoi(angle_str);
-            ser_printline("Received angle: %d\n", angle);
-            return angle;
-        }
-    }
-    return 0; // Return 0 if no angle value received
+    char line[10]; // Assuming angle values are sent as strings with maximum length 10
+    int angle = 0;
+    
+    // Read a line from the serial connection
+    ser_readline(devid, sizeof(line), line);
+    
+    // Parse the line to extract angle
+    sscanf(line, "%d\n", &angle);
+    
+    return angle;
 }
 
 void steering(int gpio, int pos)
@@ -71,6 +69,11 @@ void steering(int gpio, int pos)
     // Task-3: 
     // Your code goes here (Use Lab 05 for reference)
     // Check the project document to understand the task
+    // int pwm = (SERVO_PULSE_MIN + ((SERVO_PULSE_MAX - SERVO_PULSE_MIN) / 180) * pos);
+    // gpio_write(gpio, ON);
+    // delay_usec(pwm);
+    // gpio_write(gpio, OFF);
+    // delay_usec(SERVO_PERIOD - pwm);
 }
 
 
