@@ -22,9 +22,9 @@ def rad2deg(rad):
 
 #Get and set the number of cores to be used by TensorFlow
 if(len(sys.argv) > 1):
-	NCPU = int(sys.argv[1])
+    NCPU = int(sys.argv[1])
 else:
-	NCPU = 1
+    NCPU = 1
 config = tf.ConfigProto(intra_op_parallelism_threads=NCPU, \
                         inter_op_parallelism_threads=NCPU, \
                         allow_soft_placement=True, \
@@ -64,65 +64,62 @@ time_start = time.time()
 first_frame = True
 count = 0
 while(1):
-	if curFrame < NFRAMES:
-		cam_start = time.time()
+    if curFrame < NFRAMES:
+        cam_start = time.time()
 
-		#Get the next video frame
-		ret, img = cap.read()
-		if not ret:
-			break
+        #Get the next video frame
+        ret, img = cap.read()
+        if not ret:
+            break
+        prep_start = time.time()
 
-		prep_start = time.time()
+        #Preprocess the input frame
+        img = cv2.resize(img, (200, 66))
+        img = img / 255.
 
-		#Preprocess the input frame
-		img = cv2.resize(img, (200, 66))
-		img = img / 255.
+        pred_start = time.time()
 
-		pred_start = time.time()
-
-		#Feed the frame to the model and get the control output
-		rad = model.y.eval(feed_dict={model.x: [img]})[0][0]
-		deg = rad2deg(rad)
+        #Feed the frame to the model and get the control output
+        rad = model.y.eval(feed_dict={model.x: [img]})[0][0]
+        deg = rad2deg(rad)
         
         
         
-		# Your code goes here in this if statement
-		# The if condition is used to send every 4th
-		# prediction from the model. This is so that
-		# the HiFive can run the other functions in between
-		if count%4 == 0:
-			#convert angle to bytes and send it over UART
-			angle_bytes = bytes(str(int(deg))+'\n')
-			ser1.write(angle_bytes)
-		
-		
-        
-        
-		pred_end   = time.time()
+        # Your code goes here in this if statement
+        # The if condition is used to send every 4th
+        # prediction from the model. This is so that
+        # the HiFive can run the other functions in between
+        if count%4 == 0:
+            angle_bytes = bytes(str(int(deg))+'\n')
+            print("ANGLE BYTES: ",angle_bytes)
+            ser1.write(angle_bytes)
 
-		#Calculate the timings for each step
-		cam_time  = (prep_start - cam_start)*1000
-		prep_time = (pred_start - prep_start)*1000
-		pred_time = (pred_end - pred_start)*1000
-		tot_time  = (pred_end - cam_start)*1000
-
-		print('pred: {:0.2f} deg. took: {:0.2f} ms | cam={:0.2f} prep={:0.2f} pred={:0.2f}'.format(deg, tot_time, cam_time, prep_time, pred_time))
-		
-		#Don't include the timings for the first frame due to cache warmup
-		if first_frame:
-			first_frame = False
-		else:
-			tot_time_list.append(tot_time)
-			curFrame += 1
         
-		#Wait for next period
-		wait_time = (period - tot_time) / 1000
-		if is_periodic and wait_time > 0:
-			time.sleep(wait_time)
-		count += 1
-	else:
-		break
-	
+        pred_end = time.time()
+
+        #Calculate the timings for each step
+        cam_time=(prep_start-cam_start)*1000
+        prep_time=(pred_start-prep_start)*1000
+        pred_time=(pred_end-pred_start)*1000
+        tot_time=(pred_end-cam_start)*1000
+
+        print('pred: {:0.2f} deg. took: {:0.2f} ms | cam={:0.2f} prep={:0.2f} pred={:0.2f}'.format(deg, tot_time, cam_time, prep_time, pred_time))
+
+        #Don't include the timings for the first frame due to cache warmup
+        if first_frame:
+            first_frame = False
+        else:
+            tot_time_list.append(tot_time)
+            curFrame += 1
+        
+        #Wait for next period
+        wait_time = (period - tot_time) / 1000
+        if is_periodic and wait_time > 0:
+            time.sleep(wait_time)
+        count += 1
+    else:
+        break
+
 cap.release()
 
 #Calculate and output FPS/frequency
@@ -140,3 +137,4 @@ print("99pct: {}".format(np.percentile(tot_time_list, 99)))
 print("min: {}".format(np.min(tot_time_list)))
 print("median: {}".format(np.median(tot_time_list)))
 print("stdev: {}".format(np.std(tot_time_list)))
+
