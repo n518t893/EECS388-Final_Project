@@ -45,7 +45,6 @@ void auto_brake(int devid)
                 delay(1000);
             }
     }
-    
 }
 
 int read_from_pi(int devid)
@@ -53,16 +52,23 @@ int read_from_pi(int devid)
     // Task-2: 
     // You code goes here (Use Lab 09 for reference)
     // After performing Task-2 at dnn.py code, modify this part to read angle values from Raspberry Pi.
-    char line[3]; // Assuming angle values are sent as strings with maximum length 10
-    int angle = 0;
-    
-    // Read a line from the serial connection
-    ser_readline(devid, sizeof(line), line);
-    
-    // Parse the line to extract angle
-    sscanf(line, "%d\n", &angle);
-    
-    return angle;
+    int angle;
+    if (ser_isready(devid)) {
+        char angle_str[7];
+        ser_readline(devid, 7, angle_str);
+        sscanf(angle_str, "%d", &angle);
+        //redunadant: printf("angle = %d\n", angle); 
+
+        //int num_read = ser_readline(devid, 10, angle_str);
+        //angle = atoi(angle_str);
+        //printf('angle: %d\n', angle);
+        //ser_printline(2, angle_str);
+        //return angle;
+        return angle;
+    }
+
+    return 0; // Return 0 if no angle value received
+
 }
 
 void steering(int gpio, int pos)
@@ -70,11 +76,7 @@ void steering(int gpio, int pos)
     // Task-3: 
     // Your code goes here (Use Lab 05 for reference)
     // Check the project document to understand the task
-    // int pwm = (SERVO_PULSE_MIN + ((SERVO_PULSE_MAX - SERVO_PULSE_MIN) / 180) * pos);
-    // gpio_write(gpio, ON);
-    // delay_usec(pwm);
-    // gpio_write(gpio, OFF);
-    // delay_usec(SERVO_PERIOD - pwm);
+    
 }
 
 
